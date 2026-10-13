@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/B-Shresth12/DocuMind/backend/internal/auth"
 	"github.com/B-Shresth12/DocuMind/backend/internal/config"
 	"github.com/B-Shresth12/DocuMind/backend/internal/database"
 	"github.com/gin-gonic/gin"
@@ -79,6 +80,34 @@ func main() {
 			"status": "ready",
 		})
 	})
+
+	registrationService := &auth.RegistrationService{
+		DB: db,
+	}
+
+	registrationHandler := &auth.RegistrationHandler{
+		Service: registrationService,
+	}
+
+	sessionService := &auth.SessionService{
+		DB: db,
+	}
+
+	sessionHandler := &auth.SessionHandler{
+		Service: sessionService,
+		Env:     cfg.AppEnv,
+		DB:      db,
+	}
+
+	api := router.Group("/api/v1")
+
+	api.POST("/auth/register", registrationHandler.Register)
+	api.POST("/auth/login", sessionHandler.Login)
+
+	protected := api.Group("")
+	protected.Use(sessionHandler.RequireAuth())
+	protected.GET("/me", sessionHandler.Me)
+	protected.POST("/auth/logout", sessionHandler.Logout)
 
 	server := &http.Server{
 		Addr:              ":" + cfg.AppPort,

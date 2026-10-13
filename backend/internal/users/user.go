@@ -13,4 +13,5 @@ type User struct {
 	DisplayName  string    `grom:"type:varchar(120);not null"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	DisabledAt   *time.Time
 }
