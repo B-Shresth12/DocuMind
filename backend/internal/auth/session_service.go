@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/B-Shresth12/DocuMind/backend/internal/users"
@@ -21,8 +22,15 @@ type SessionService struct {
 	DB *gorm.DB
 }
 
+func ipPtr(raw string) *string {
+	if net.ParseIP(raw) == nil {
+		return nil
+	}
+	return &raw
+}
+
 func (s *SessionService) Login(
-	email, password, userAgent string,
+	email, password, userAgent string, ip string,
 ) (*users.User, string, error) {
 	var user users.User
 
@@ -61,6 +69,7 @@ func (s *SessionService) Login(
 		ExpiresAt:  time.Now().Add(SessionDuration),
 		UserAgent:  userAgent,
 		LastSeenAt: time.Now(),
+		IPAddress:  ipPtr(ip),
 	}
 
 	if err := s.DB.Create(&session).Error; err != nil {

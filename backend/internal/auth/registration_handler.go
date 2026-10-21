@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/B-Shresth12/DocuMind/backend/httpx"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,7 +17,8 @@ func (h *RegistrationHandler) Register(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid registration details",
+			"message": "invalid registration details",
+			"error":   httpx.FormatValidationErrors(err),
 		})
 		return
 	}

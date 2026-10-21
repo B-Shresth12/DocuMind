@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/B-Shresth12/DocuMind/backend/httpx"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,7 @@ type SessionHandler struct {
 
 type LoginRequest struct {
 	Email    string `json:"email" binding:"required,email,max=320"`
-	Password string `json:"password" binding:"required,email,min=1,max=128"`
+	Password string `json:"password" binding:"required,min=1,max=128"`
 }
 
 func (h *SessionHandler) setSessionCookie(c *gin.Context, token string) {
@@ -41,7 +42,8 @@ func (h *SessionHandler) Login(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid login details",
+			"message": "invalid login details",
+			"errors":  httpx.FormatValidationErrors(err),
 		})
 		return
 	}
@@ -50,6 +52,7 @@ func (h *SessionHandler) Login(c *gin.Context) {
 		strings.ToLower(strings.TrimSpace(req.Email)),
 		req.Password,
 		c.Request.UserAgent(),
+		c.ClientIP(),
 	)
 	if err != nil {
 		if errors.Is(err, ErrInvalidCredentials) {

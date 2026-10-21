@@ -14,6 +14,6 @@ type Session struct {
 	LastSeenAt time.Time `gorm:"not null;autoCreateTime"`
 	ExpiresAt  time.Time `gorm:"not null;index"`
 	RevokedAt  *time.Time
-	UserAgent  string `gorm:"type:text"`
-	IPAddress  string `gorm:"type:inet"`
+	UserAgent  string  `gorm:"type:text"`
+	IPAddress  *string `gorm:"type:inet"`
 }
