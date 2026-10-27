@@ -14,6 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
+const SessionCookieName = "documind_session"
 const SessionDuration = 7 * 24 * time.Hour
 
 var ErrInvalidCredentials = errors.New("invalid email or password")
@@ -27,6 +28,10 @@ func ipPtr(raw string) *string {
 		return nil
 	}
 	return &raw
+}
+
+func (s *SessionService) GetSessionCookieName() string {
+	return SessionCookieName
 }
 
 func (s *SessionService) Login(
@@ -120,6 +125,15 @@ func (s *SessionService) Logout(token string) error {
 	}
 
 	return nil
+}
+
+func (s *SessionService) FindSessionUserID(token string) (string, error) {
+	user, err := s.FindSessionUser(token)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprint(user.ID), nil
 }
 
 var _ uuid.UUID

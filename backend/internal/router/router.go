@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/B-Shresth12/DocuMind/backend/internal/auth"
+	"github.com/B-Shresth12/DocuMind/backend/internal/middleware"
+	"github.com/B-Shresth12/DocuMind/backend/internal/workspaces"
 	"github.com/B-Shresth12/DocuMind/backend/response"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -63,8 +65,15 @@ func (p *RouterProvider) Register() (*gin.Engine, error) {
 		)
 	})
 
+	sessionService := &auth.SessionService{
+		DB: p.DB,
+	}
+
+	authMiddleware := middleware.NewAuthMiddleware(sessionService)
+
 	api := engine.Group("api/")
-	auth.RegisterRoutes(api, p.DB, p.AppEnv)
+	auth.RegisterRoutes(api, p.DB, p.AppEnv, authMiddleware.RequireAuth())
+	workspaces.RegisterRoutes(api, p.DB, authMiddleware.RequireAuth())
 
 	return engine, nil
 }

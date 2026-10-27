@@ -47,30 +47,24 @@ func (s *RegistrationService) Register(
 			return fmt.Errorf("create user: %w", err)
 		}
 
-		workspace := workspaces.Workspace{
-			Name:      workspaceName,
-			CreatedBy: user.ID,
+		workspaceReq := workspaces.WorkspaceRequest{
+			Name: workspaceName,
 		}
 
-		if err := tx.Create(&workspace).Error; err != nil {
-			return fmt.Errorf("create workspace: %w", err)
+		workspaceService := workspaces.WorkspaceService{
+			DB: tx,
 		}
 
-		member := workspaces.WorkspaceMember{
-			WorkspaceID: workspace.ID,
-			UserID:      user.ID,
-			Role:        "owner",
-		}
-
-		if err := tx.Create(&member).Error; err != nil {
-			return fmt.Errorf("create workspace membership: %w", err)
+		workspace, err := workspaceService.AddAuthWorkspace(workspaceReq, user.ID.String())
+		if err != nil {
+			return fmt.Errorf("%v", err.Error())
 		}
 
 		response = RegisterResponse{
 			ID:            user.ID.String(),
 			Email:         user.Email,
 			DisplayName:   user.DisplayName,
-			WorkspaceID:   workspace.ID.String(),
+			WorkspaceID:   workspace.ID,
 			WorkspaceName: workspace.Name,
 		}
 

@@ -12,8 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const SessionCookieName = "documind_session"
-
 type SessionHandler struct {
 	Service *SessionService
 	Env     string
@@ -28,13 +26,13 @@ type LoginRequest struct {
 func (h *SessionHandler) setSessionCookie(c *gin.Context, token string) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
-		SessionCookieName,              //name
-		token,                          //value
-		int(SessionDuration.Seconds()), //maxAge
-		"/",                            //path
-		"",                             //domain
-		h.Env == "production",          //secure
-		true,                           //httpOnly
+		h.Service.GetSessionCookieName(), //name
+		token,                            //value
+		int(SessionDuration.Seconds()),   //maxAge
+		"/",                              //path
+		"",                               //domain
+		h.Env == "production",            //secure
+		true,                             //httpOnly
 	)
 }
 
@@ -143,7 +141,7 @@ func (h *SessionHandler) Me(c *gin.Context) {
 }
 
 func (h *SessionHandler) Logout(c *gin.Context) {
-	token, err := c.Cookie(SessionCookieName)
+	token, err := c.Cookie(h.Service.GetSessionCookieName())
 	if err == nil && token != "" {
 		if err := h.Service.Logout(token); err != nil {
 
@@ -158,13 +156,13 @@ func (h *SessionHandler) Logout(c *gin.Context) {
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(
-		SessionCookieName,     //name
-		"",                    //value
-		-1,                    //maxAge
-		"/",                   //path
-		"",                    //domain
-		h.Env == "production", //secure
-		true,                  //httpOnly
+		h.Service.GetSessionCookieName(), //name
+		"",                               //value
+		-1,                               //maxAge
+		"/",                              //path
+		"",                               //domain
+		h.Env == "production",            //secure
+		true,                             //httpOnly
 	)
 
 	c.Status(http.StatusNoContent)

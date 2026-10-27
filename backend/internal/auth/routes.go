@@ -5,7 +5,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(api *gin.RouterGroup, db *gorm.DB, appEnv string) {
+func RegisterRoutes(
+	api *gin.RouterGroup,
+	db *gorm.DB,
+	appEnv string,
+	requireAuth gin.HandlerFunc,
+) {
 	registrationService := &RegistrationService{
 		DB: db,
 	}
@@ -30,7 +35,7 @@ func RegisterRoutes(api *gin.RouterGroup, db *gorm.DB, appEnv string) {
 	authRoutes.POST("/login", sessionHandler.Login)
 
 	protected := v1.Group("")
-	protected.Use(sessionHandler.RequireAuth())
+	protected.Use(requireAuth)
 
 	protected.GET("/me", sessionHandler.Me)
 	protected.POST("/auth/logout", sessionHandler.Logout)
