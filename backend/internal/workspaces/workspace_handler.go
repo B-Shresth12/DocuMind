@@ -1,6 +1,7 @@
 package workspaces
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/B-Shresth12/DocuMind/backend/httpx"
@@ -48,6 +49,44 @@ func (h *WorkspaceHandler) GetAuthWorkspaces(c *gin.Context) {
 		http.StatusOK,
 		"Workspace fetched",
 		workspaces,
+	)
+
+}
+
+func (h *WorkspaceHandler) GetDetails(c *gin.Context) {
+	id := c.Param("id")
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+		response.Message(
+			c,
+			http.StatusUnauthorized,
+			"Unauthorized",
+		)
+		return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok || userIDStr == "" {
+		response.Message(c, http.StatusUnauthorized, "Invalid user identity")
+		return
+	}
+
+	workspace, err := h.Service.GetDetailsByID(id, userIDStr)
+
+	if err != nil {
+		response.Message(c,
+			http.StatusInternalServerError,
+			"Failed to fetch workspace",
+		)
+		return
+	}
+
+	response.Data(
+		c,
+		http.StatusOK,
+		"Workspace fetched",
+		workspace,
 	)
 
 }
@@ -101,9 +140,7 @@ func (h *WorkspaceHandler) AddAuthWorkspace(c *gin.Context) {
 	)
 }
 
-func (h *WorkspaceHandler) GetDetails(c *gin.Context) {
-	id := c.Param("id")
-
+func (h *WorkspaceHandler) UpdateAuthWorkspace(c *gin.Context) {
 	userID, exists := c.Get("user_id")
 	if !exists {
 		response.Message(
@@ -120,20 +157,52 @@ func (h *WorkspaceHandler) GetDetails(c *gin.Context) {
 		return
 	}
 
-	workspace, err := h.Service.GetDetailsByID(id, userIDStr)
+	workspaceID := c.Param("id")
 
+	var request WorkspaceRequest
+	if err := c.ShouldBind(&request); err != nil {
+		response.Data(
+			c,
+			http.StatusUnprocessableEntity,
+			"Validation Error",
+			gin.H{
+				"error": httpx.FormatValidationErrors(err),
+			},
+		)
+		return
+	}
+
+	workspace, err := h.Service.UpdateAuthWorkspace(request, userIDStr, workspaceID)
 	if err != nil {
-		response.Message(c,
+		if errors.Is(err, ErrInsufficientPermissions) {
+			response.Message(
+				c,
+				http.StatusForbidden,
+				"You don't have permission to update this workspace",
+			)
+			return
+		}
+		if errors.Is(err, ErrInsufficientPermissions) {
+			response.Message(
+				c,
+				http.StatusForbidden,
+				"You don't have permission to update this workspace",
+			)
+			return
+		}
+
+		response.Message(
+			c,
 			http.StatusInternalServerError,
-			"Failed to fetch workspace",
+			"Failed to update workspace",
 		)
 		return
 	}
 
 	response.Data(
 		c,
-		http.StatusOK,
-		"Workspace fetched",
+		200,
+		"Workspace Created!!",
 		workspace,
 	)
 

@@ -1,11 +1,14 @@
 package workspaces
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+var ErrInsufficientPermissions = errors.New("insufficient permissions")
 
 type WorkspaceService struct {
 	DB *gorm.DB
@@ -131,4 +134,35 @@ func (s *WorkspaceService) AddAuthWorkspace(
 	}
 
 	return &result, nil
+}
+
+func (s *WorkspaceService) UpdateAuthWorkspace(
+	request WorkspaceRequest,
+	userID string,
+	workspaceID string,
+) (*AuthWorkspace, error) {
+
+	workspace, err := s.GetDetailsByID(workspaceID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	//check of the auth user is either owner or admin
+	if workspace.Role != "owner" && workspace.Role != "admin" {
+		return nil, ErrInsufficientPermissions
+	}
+
+	//Update the workspace
+	if err := s.DB.
+		Model(&Workspace{}).
+		Where("id = ?", workspaceID).
+		Update("name", request.Name).Error; err != nil {
+		return nil, fmt.Errorf("Failed while update: %w", err)
+	}
+
+	return &AuthWorkspace{
+		ID:   workspace.ID,
+		Name: request.Name,
+		Role: workspace.Role,
+	}, nil
 }
