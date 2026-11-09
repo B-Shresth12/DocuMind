@@ -101,7 +101,7 @@ func (h *WorkspaceHandler) AddAuthWorkspace(c *gin.Context) {
 	)
 }
 
-func (h *WorkspaceHandler) getDetails(c *gin.Context) {
+func (h *WorkspaceHandler) GetDetails(c *gin.Context) {
 	id := c.Param("id")
 
 	userID, exists := c.Get("user_id")
@@ -120,5 +120,21 @@ func (h *WorkspaceHandler) getDetails(c *gin.Context) {
 		return
 	}
 
-	// workspace, err := h.Service.GetDetailsByID(id, userIDStr)
+	workspace, err := h.Service.GetDetailsByID(id, userIDStr)
+
+	if err != nil {
+		response.Message(c,
+			http.StatusInternalServerError,
+			"Failed to fetch workspace",
+		)
+		return
+	}
+
+	response.Data(
+		c,
+		http.StatusOK,
+		"Workspace fetched",
+		workspace,
+	)
+
 }

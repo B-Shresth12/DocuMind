@@ -12,3 +12,11 @@ type AuthWorkspaceList struct {
 type WorkspaceRequest struct {
 	Name string `json:"name" binding:"required,min=2,max=20"`
 }
+
+type WorkspaceDetails struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Role         string `json:"role"`
+	CreatedAt    string `json:"created_at"`
+	TotalMembers int16  `json:"total_members"`
+}

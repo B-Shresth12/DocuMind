@@ -38,6 +38,37 @@ func (s *WorkspaceService) AuthUserWorkspace(userID string) (*AuthWorkspaceList,
 	}, nil
 }
 
+func (s *WorkspaceService) GetDetailsByID(
+	id string,
+	userID string,
+) (*WorkspaceDetails, error) {
+
+	var workspace WorkspaceDetails
+
+	err := s.DB.
+		Table("workspaces AS w").
+		Select(`
+            w.id,
+            w.name,
+            wm.role,
+            w.created_at,
+            (
+                SELECT COUNT(*)
+                FROM workspace_members AS members
+                WHERE members.workspace_id = w.id
+            ) AS total_members
+        `).
+		Joins("JOIN workspace_members AS wm ON wm.workspace_id = w.id").
+		Where("w.id = ? AND wm.user_id = ?", id, userID).
+		First(&workspace).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("get workspace details: %w", err)
+	}
+
+	return &workspace, nil
+}
+
 func (s *WorkspaceService) AddAuthWorkspace(
 	request WorkspaceRequest,
 	userID string,
@@ -101,7 +132,3 @@ func (s *WorkspaceService) AddAuthWorkspace(
 
 	return &result, nil
 }
-
-// func (s *WorkspaceService) GetDetailsByID(id string, userID string) {
-
-// }
