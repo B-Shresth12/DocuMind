@@ -207,3 +207,22 @@ func (h *WorkspaceHandler) UpdateAuthWorkspace(c *gin.Context) {
 	)
 
 }
+
+func (h *WorkspaceHandler) GetWorkspaceMembers(c *gin.Context) {
+	id := c.Param("id")
+	members, err := h.Service.GetWorkspaceUsers(id)
+	if err != nil {
+		response.Message(c,
+			http.StatusInternalServerError,
+			"Failed to fetch workspace members",
+		)
+		return
+	}
+
+	response.Data(
+		c,
+		http.StatusOK,
+		"Members fetched",
+		members,
+	)
+}

@@ -166,3 +166,26 @@ func (s *WorkspaceService) UpdateAuthWorkspace(
 		Role: workspace.Role,
 	}, nil
 }
+
+func (s *WorkspaceService) GetWorkspaceUsers(workspaceID string) (*WorkspaceMemberResponse, error) {
+	var members []WorkspaceMembers
+
+	err := s.DB.
+		Select("u.id AS user_id, u.display_name AS name, u.email, wm.role, wm.joined_at").
+		Table("workspace_members AS wm").
+		Joins("INNER JOIN users AS u ON u.id = wm.user_id").
+		Where("wm.workspace_id = ?", workspaceID).
+		Scan(&members).Error
+	if err != nil {
+		return nil, fmt.Errorf("Member list error: %w", err)
+	}
+
+	if members == nil {
+		members = []WorkspaceMembers{}
+	}
+
+	return &WorkspaceMemberResponse{
+		Members: members,
+	}, nil
+
+}

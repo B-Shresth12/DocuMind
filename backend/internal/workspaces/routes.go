@@ -24,6 +24,7 @@ func RegisterRoutes(
 
 	workspaceRoutes.GET("/", workspaceHandler.GetAuthWorkspaces)
 	workspaceRoutes.POST("/", workspaceHandler.AddAuthWorkspace)
-	workspaceRoutes.GET("/show/:id", workspaceHandler.GetDetails)
-	workspaceRoutes.PATCH("/update/:id", workspaceHandler.UpdateAuthWorkspace)
+	workspaceRoutes.GET("/:id", workspaceHandler.GetDetails)
+	workspaceRoutes.PATCH("/:id", workspaceHandler.UpdateAuthWorkspace)
+	workspaceRoutes.GET("/:id/members", workspaceHandler.GetWorkspaceMembers)
 }

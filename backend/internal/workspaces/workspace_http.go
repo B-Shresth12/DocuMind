@@ -20,3 +20,15 @@ type WorkspaceDetails struct {
 	CreatedAt    string `json:"created_at"`
 	TotalMembers int16  `json:"total_members"`
 }
+
+type WorkspaceMembers struct {
+	UserId   string `json:"user_id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+	JoinedAt string `json:"joined_at"`
+}
+
+type WorkspaceMemberResponse struct {
+	Members []WorkspaceMembers `json:"members"`
+}
