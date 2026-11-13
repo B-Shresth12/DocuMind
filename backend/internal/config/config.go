@@ -10,9 +10,11 @@ import (
 )
 
 type Config struct {
-	AppEnv      string
-	AppPort     string
-	DatabaseURL string
+	AppEnv           string
+	AppPort          string
+	DatabaseURL      string
+	StorageDriver    string
+	StorageLocalPath string
 }
 
 func Load() (Config, error) {
@@ -21,9 +23,11 @@ func Load() (Config, error) {
 	}
 
 	cfg := Config{
-		AppEnv:      strings.TrimSpace(os.Getenv("APP_ENV")),
-		AppPort:     strings.TrimSpace(os.Getenv("APP_PORT")),
-		DatabaseURL: strings.TrimSpace(os.Getenv("DATABASE_URL")),
+		AppEnv:           strings.TrimSpace(os.Getenv("APP_ENV")),
+		AppPort:          strings.TrimSpace(os.Getenv("APP_PORT")),
+		DatabaseURL:      strings.TrimSpace(os.Getenv("DATABASE_URL")),
+		StorageDriver:    strings.ToLower(strings.TrimSpace(os.Getenv("STORAGE_DRIVER"))),
+		StorageLocalPath: strings.TrimSpace(os.Getenv("STORAGE_LOCAL_PATH")),
 	}
 
 	if cfg.AppEnv == "" {
