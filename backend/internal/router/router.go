@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/B-Shresth12/DocuMind/backend/internal/auth"
+	"github.com/B-Shresth12/DocuMind/backend/internal/documents"
 	"github.com/B-Shresth12/DocuMind/backend/internal/middleware"
 	"github.com/B-Shresth12/DocuMind/backend/internal/workspaces"
 	"github.com/B-Shresth12/DocuMind/backend/response"
@@ -74,6 +75,7 @@ func (p *RouterProvider) Register() (*gin.Engine, error) {
 	api := engine.Group("api/")
 	auth.RegisterRoutes(api, p.DB, p.AppEnv, authMiddleware.RequireAuth())
 	workspaces.RegisterRoutes(api, p.DB, authMiddleware.RequireAuth())
+	documents.RegisterRoutes(api, p.DB, authMiddleware.RequireAuth())
 
 	return engine, nil
 }

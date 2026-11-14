@@ -5,6 +5,7 @@ import (
 
 	"github.com/B-Shresth12/DocuMind/backend/constants"
 	"github.com/B-Shresth12/DocuMind/backend/internal/auth"
+	"github.com/B-Shresth12/DocuMind/backend/internal/documents"
 	"github.com/B-Shresth12/DocuMind/backend/internal/users"
 	"github.com/B-Shresth12/DocuMind/backend/internal/workspaces"
 	"gorm.io/gorm"
@@ -18,6 +19,7 @@ func Migrate(db *gorm.DB) error {
 		&workspaces.Workspace{},
 		&workspaces.WorkspaceMember{},
 		&auth.Session{},
+		&documents.Document{},
 	); err != nil {
 		fmt.Printf("%sMigration failed%s\n", constants.ColorRed, constants.ColorReset)
 		return fmt.Errorf("run database migrations: %w", err)
